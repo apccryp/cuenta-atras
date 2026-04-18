@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cuenta Atrás</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f0f4f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 16px;
+}
+
+.ca-wrapper {
+  background: linear-gradient(135deg, var(--c1, #1a3a6b), var(--c2, #2e74b5));
+  border-radius: 18px;
+  padding: 30px 24px 24px;
+  width: 100%;
+  max-width: 540px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  color: #fff;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.ca-wrapper::before,
+.ca-wrapper::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.08);
+  pointer-events: none;
+}
+.ca-wrapper::before { width: 340px; height: 340px; top: -120px; right: -100px; }
+.ca-wrapper::after  { width: 200px; height: 200px; bottom: -60px; left: -60px; }
+
+.ca-titulo {
+  font-size: 0.78em;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  opacity: 0.65;
+  margin-bottom: 6px;
+}
+
+.ca-evento {
+  font-size: 1.45em;
+  font-weight: 800;
+  color: #f0c040;
+  margin-bottom: 5px;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  line-height: 1.3;
+}
+
+.ca-fecha-obj {
+  font-size: 0.78em;
+  opacity: 0.6;
+  margin-bottom: 24px;
+  letter-spacing: 0.5px;
+}
+
+/* ── Dígitos ── */
+.ca-bloques {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.ca-bloque { display: flex; flex-direction: column; align-items: center; }
+
+.ca-num {
+  background: rgba(0,0,0,0.28);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  width: 76px; height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.4em;
+  font-weight: 900;
+  color: #f0c040;
+  letter-spacing: -2px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  position: relative;
+  transition: transform 0.12s ease, color 0.12s ease;
+  overflow: hidden;
+}
+
+.ca-num::after {
+  content: '';
+  position: absolute;
+  left: 8px; right: 8px;
+  top: 50%; height: 1px;
+  background: rgba(0,0,0,0.2);
+}
+
+.ca-num.flip {
+  transform: scale(1.1);
+  color: #fff;
+}
+
+.ca-label {
+  font-size: 0.6em;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  opacity: 0.55;
+  margin-top: 7px;
+}
+
+.ca-sep {
+  font-size: 2.2em;
+  font-weight: 900;
+  color: #f0c040;
+  margin-top: 12px;
+  opacity: 0.5;
+  animation: blink 1s step-end infinite;
+  user-select: none;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 0.1; }
+}
+
+/* ── Barra de progreso ── */
+.ca-barra-wrap {
+  background: rgba(0,0,0,0.25);
+  border-radius: 100px;
+  height: 7px;
+  margin: 0 6px 16px;
+  overflow: hidden;
+}
+
+.ca-barra {
+  height: 100%;
+  border-radius: 100px;
+  background: linear-gradient(90deg, #f0c040, #ffffff88);
+  transition: width 1s linear;
+}
+
+/* ── Urgencia ── */
+.urgente .ca-num { color: #ff6b6b !important; }
+.urgente .ca-sep { color: #ff6b6b !important; }
+.urgente .ca-evento { color: #ff6b6b !important; }
+
+/* ── Mensaje fin ── */
+.ca-fin {
+  font-size: 1.4em;
+  font-weight: 800;
+  color: #f0c040;
+  padding: 16px 0 10px;
+  animation: glow 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from { text-shadow: 0 0 6px rgba(240,192,64,0.4); }
+  to   { text-shadow: 0 0 20px rgba(240,192,64,1); }
+}
+
+/* ── Pie ── */
+.ca-pie {
+  font-size: 0.72em;
+  opacity: 0.4;
+  letter-spacing: 1px;
+  margin-top: 4px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 380px) {
+  .ca-num { width: 60px; height: 56px; font-size: 1.9em; }
+  .ca-sep { font-size: 1.7em; margin-top: 8px; }
+  .ca-evento { font-size: 1.1em; }
+}
+</style>
+</head>
+<body>
+
+<div class="ca-wrapper" id="caWrap">
+  <p class="ca-titulo">Cuenta atrás para</p>
+  <p class="ca-evento"  id="caEvento"></p>
+  <p class="ca-fecha-obj" id="caFechaObj"></p>
+
+  <div class="ca-bloques" id="caBloques">
+    <div class="ca-bloque">
+      <div class="ca-num" id="caDias">--</div>
+      <div class="ca-label">Días</div>
+    </div>
+    <span class="ca-sep">:</span>
+    <div class="ca-bloque">
+      <div class="ca-num" id="caHoras">--</div>
+      <div class="ca-label">Horas</div>
+    </div>
+    <span class="ca-sep">:</span>
+    <div class="ca-bloque">
+      <div class="ca-num" id="caMin">--</div>
+      <div class="ca-label">Min</div>
+    </div>
+    <span class="ca-sep">:</span>
+    <div class="ca-bloque">
+      <div class="ca-num" id="caSeg">--</div>
+      <div class="ca-label">Seg</div>
+    </div>
+  </div>
+
+  <div class="ca-barra-wrap">
+    <div class="ca-barra" id="caBarra" style="width:0%"></div>
+  </div>
+
+  <p class="ca-pie" id="caPie"></p>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   ▶  ZONA DE CONFIGURACIÓN — SOLO TOCA ESTE BLOQUE
+   ═══════════════════════════════════════════════════════════════
+
+   MESES (usa el número entre paréntesis):
+     Enero=0  Febrero=1  Marzo=2    Abril=3    Mayo=4    Junio=5
+     Julio=6  Agosto=7   Septiembre=8  Octubre=9  Noviembre=10  Diciembre=11
+   ═══════════════════════════════════════════════════════════════ */
+
+const CONFIG = {
+
+  /* ── Evento ─────────────────────────────────────────── */
+  evento:       '📋 Fin de Curso',   // ← Texto principal
+
+  /* ── Fecha y hora de FIN (año, mes, día, hora, minuto) ─ */
+  fechaFin:     new Date(2026, 5, 19, 13, 00),  // 15 junio 2026 a las 23:59
+
+  /* ── Fecha de INICIO para calcular % de progreso ─────── */
+  fechaInicio:  new Date(2026, 3, 18),           // 18 abril 2026
+
+  /* ── Mensaje cuando llegue a 0 ───────────────────────── */
+  mensajeFin:   '🎉 ¡Felices vacaciones!',
+
+  /* ── Días restantes para mostrar alerta roja ──────────── */
+  diasUrgencia: 3,
+
+  /* ── Colores (código hexadecimal) ───────────────────────
+     color1 = fondo oscuro    color2 = fondo claro          */
+  color1: '#1a3a6b',
+  color2: '#2e74b5',
+
+};
+/* ═══════════════════════════════════════════════════════════════
+   FIN DE LA ZONA DE CONFIGURACIÓN — no toques lo de abajo
+   ═══════════════════════════════════════════════════════════════ */
+
+// Aplicar colores
+document.documentElement.style.setProperty('--c1', CONFIG.color1);
+document.documentElement.style.setProperty('--c2', CONFIG.color2);
+
+// Nombres de meses en español
+const MESES = ['enero','febrero','marzo','abril','mayo','junio',
+               'julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+function fmtFecha(d) {
+  const h = String(d.getHours()).padStart(2,'0');
+  const m = String(d.getMinutes()).padStart(2,'0');
+  return `${d.getDate()} de ${MESES[d.getMonth()]} de ${d.getFullYear()} · ${h}:${m} h`;
+}
+
+function pad(n) { return String(Math.floor(n)).padStart(2,'0'); }
+
+document.getElementById('caEvento').textContent   = CONFIG.evento;
+document.getElementById('caFechaObj').textContent = fmtFecha(CONFIG.fechaFin);
+
+const totalMs = CONFIG.fechaFin - CONFIG.fechaInicio;
+
+let prevVals = {};
+
+function setNum(id, val) {
+  const el  = document.getElementById(id);
+  const txt = pad(val);
+  if (prevVals[id] !== txt) {
+    prevVals[id] = txt;
+    el.textContent = txt;
+    el.classList.add('flip');
+    setTimeout(() => el.classList.remove('flip'), 120);
+  }
+}
+
+function tick() {
+  const ahora    = new Date();
+  const restante = CONFIG.fechaFin - ahora;
+
+  if (restante <= 0) {
+    document.getElementById('caBloques').innerHTML =
+      `<p class="ca-fin">${CONFIG.mensajeFin}</p>`;
+    document.getElementById('caBarra').style.width = '100%';
+    document.getElementById('caPie').textContent   = '';
+    clearInterval(timer);
+    return;
+  }
+
+  const dias  = Math.floor(restante / 86400000);
+  const horas = Math.floor((restante % 86400000) / 3600000);
+  const min   = Math.floor((restante % 3600000)  / 60000);
+  const seg   = Math.floor((restante % 60000)    / 1000);
+
+  setNum('caDias',  dias);
+  setNum('caHoras', horas);
+  setNum('caMin',   min);
+  setNum('caSeg',   seg);
+
+  // Barra de progreso
+  const pct = Math.min(100, ((totalMs - restante) / totalMs) * 100);
+  document.getElementById('caBarra').style.width = pct.toFixed(2) + '%';
+
+  // Urgencia
+  const wrap = document.getElementById('caWrap');
+  if (dias < CONFIG.diasUrgencia) {
+    wrap.classList.add('urgente');
+  } else {
+    wrap.classList.remove('urgente');
+  }
+
+  // Pie
+  const diasTxt = dias === 1 ? '1 día' : `${dias} días`;
+  document.getElementById('caPie').textContent = `Faltan ${diasTxt} para el plazo`;
+}
+
+tick();
+const timer = setInterval(tick, 1000);
+</script>
+</body>
+</html>
