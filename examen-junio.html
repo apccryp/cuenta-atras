@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Examen de Junio</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:16px}
+.ca{background:linear-gradient(135deg,#1a3a6b,#2e74b5);border-radius:16px;padding:28px 20px 22px;width:100%;max-width:520px;box-shadow:0 8px 32px rgba(0,0,0,.35);color:#fff;text-align:center}
+.ca-tit{font-size:.78em;letter-spacing:3px;text-transform:uppercase;opacity:.65;margin-bottom:6px}
+.ca-ev{font-size:1.4em;font-weight:800;color:#f0c040;margin-bottom:5px;text-shadow:0 2px 10px rgba(0,0,0,.3)}
+.ca-fec{font-size:.78em;opacity:.6;margin-bottom:22px}
+.ca-bl{display:flex;justify-content:center;align-items:flex-start;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.ca-b{display:flex;flex-direction:column;align-items:center}
+.ca-n{background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.12);border-radius:12px;width:74px;height:68px;display:flex;align-items:center;justify-content:center;font-size:2.3em;font-weight:900;color:#f0c040;letter-spacing:-2px;text-shadow:0 2px 8px rgba(0,0,0,.5)}
+.ca-lb{font-size:.6em;letter-spacing:2.5px;text-transform:uppercase;opacity:.55;margin-top:6px}
+.ca-sp{font-size:2.2em;font-weight:900;color:#f0c040;margin-top:12px;opacity:.5;animation:blink 1s step-end infinite}
+@keyframes blink{0%,100%{opacity:.5}50%{opacity:.1}}
+.ca-pw{background:rgba(0,0,0,.25);border-radius:100px;height:6px;margin:0 6px 14px;overflow:hidden}
+.ca-p{height:100%;border-radius:100px;background:linear-gradient(90deg,#f0c040,rgba(255,255,255,.5));transition:width 1s linear}
+.ca-pie{font-size:.72em;opacity:.4;letter-spacing:1px}
+.ca-fin{font-size:1.3em;font-weight:800;color:#f0c040;padding:14px 0;animation:glow 1.2s ease-in-out infinite alternate}
+@keyframes glow{from{text-shadow:0 0 6px rgba(240,192,64,.4)}to{text-shadow:0 0 22px #f0c040}}
+.urgente .ca-n,.urgente .ca-sp,.urgente .ca-ev{color:#ff6b6b!important}
+@media(max-width:380px){.ca-n{width:58px;height:56px;font-size:1.8em}.ca-sp{font-size:1.7em;margin-top:8px}.ca-ev{font-size:1.1em}}
+</style>
+</head>
+<body>
+<div class="ca" id="caW">
+  <p class="ca-tit">Cuenta atrás para</p>
+  <p class="ca-ev"  id="caEv"></p>
+  <p class="ca-fec" id="caFe"></p>
+  <div class="ca-bl" id="caBl">
+    <div class="ca-b"><div class="ca-n" id="caD">--</div><div class="ca-lb">Días</div></div>
+    <span class="ca-sp">:</span>
+    <div class="ca-b"><div class="ca-n" id="caH">--</div><div class="ca-lb">Horas</div></div>
+    <span class="ca-sp">:</span>
+    <div class="ca-b"><div class="ca-n" id="caM">--</div><div class="ca-lb">Min</div></div>
+    <span class="ca-sp">:</span>
+    <div class="ca-b"><div class="ca-n" id="caS">--</div><div class="ca-lb">Seg</div></div>
+  </div>
+  <div class="ca-pw"><div class="ca-p" id="caPr" style="width:0%"></div></div>
+  <p class="ca-pie" id="caPi"></p>
+</div>
+<script>
+var EVENTO    = '📝 Examen de Junio';
+var FECHA_FIN = new Date(2026, 5, 19, 9, 0);   // 19 junio 2026 · 09:00
+var FECHA_INI = new Date(2026, 3, 18);           // 18 abril 2026
+var MSG_FIN   = '📝 ¡El examen ha comenzado!';
+var DIAS_ROJO = 3;
+
+var M=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+function pad(n){return String(Math.floor(n)).padStart(2,'0');}
+function fmtD(d){return d.getDate()+' de '+M[d.getMonth()]+' de '+d.getFullYear()+' · '+pad(d.getHours())+':'+pad(d.getMinutes())+' h';}
+document.getElementById('caEv').textContent=EVENTO;
+document.getElementById('caFe').textContent=fmtD(FECHA_FIN);
+var TOTAL=FECHA_FIN-FECHA_INI;
+function tick(){
+  var r=FECHA_FIN-new Date();
+  if(r<=0){document.getElementById('caBl').innerHTML='<p class="ca-fin">'+MSG_FIN+'</p>';document.getElementById('caPr').style.width='100%';document.getElementById('caPi').textContent='';clearInterval(timer);return;}
+  var d=Math.floor(r/86400000),h=Math.floor(r%86400000/3600000),m=Math.floor(r%3600000/60000),s=Math.floor(r%60000/1000);
+  document.getElementById('caD').textContent=pad(d);
+  document.getElementById('caH').textContent=pad(h);
+  document.getElementById('caM').textContent=pad(m);
+  document.getElementById('caS').textContent=pad(s);
+  document.getElementById('caPr').style.width=Math.min(100,((TOTAL-r)/TOTAL*100)).toFixed(2)+'%';
+  document.getElementById('caW').classList[d<DIAS_ROJO?'add':'remove']('urgente');
+  document.getElementById('caPi').textContent='Faltan '+(d===1?'1 día':d+' días')+' para el examen';
+}
+tick();var timer=setInterval(tick,1000);
+</script>
+</body>
+</html>
